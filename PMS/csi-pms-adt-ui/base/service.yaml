@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-adt-ui
-  name: csi-adt-ui
+    app: csi-adt-ui-service
+  name: csi-adt-ui-service
   namespace: csi-dev
 spec:
   ports:
