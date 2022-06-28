@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-lab-labg-ui
-  name: csi-lab-labg-ui
+    app: csi-lab-labg-ui-service
+  name: csi-lab-labg-ui-service
   namespace: csi-dev
 spec:
   ports:
