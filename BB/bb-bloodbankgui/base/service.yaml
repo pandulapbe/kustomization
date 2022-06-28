@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-bloodbank-ui
-  name: csi-bloodbank-ui
+    app: csi-bloodbank-ui-service
+  name: csi-bloodbank-ui-service
   namespace: csi-dev
 spec:
   ports:
