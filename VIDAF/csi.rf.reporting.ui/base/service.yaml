@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-report-studio-ui
-  name: csi-report-studio-ui
+    app: csi-report-studio-ui-service
+  name: csi-report-studio-ui-service
   namespace: csi-dev
 spec:
   ports:
