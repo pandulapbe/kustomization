@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-pharmacy-ui
-  name: csi-pharmacy-ui
+    app: csi-pharmacy-ui-service
+  name: csi-pharmacy-ui-service
   namespace: csi-dev
 spec:
   ports:
