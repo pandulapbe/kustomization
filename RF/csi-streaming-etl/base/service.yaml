@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-streaming-etl
-  name: csi-streaming-etl
+    app: csi-streaming-etl-service
+  name: csi-streaming-etl-service
   namespace: csi-dev
 spec:
   ports:
