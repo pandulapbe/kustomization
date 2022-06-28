@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-bm-approval-java-serviceg
-  name: csi-bm-approval-java-serviceg
+    app: csi-bm-approval
+  name: csi-bm-approval
   namespace: csi-dev
 spec:
   ports:
