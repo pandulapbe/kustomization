@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-bm-invoice-java-service
-  name: csi-bm-invoice-java-service
+    app: csi-bm-invoice
+  name: csi-bm-invoice
   namespace: csi-dev
 spec:
   ports:
