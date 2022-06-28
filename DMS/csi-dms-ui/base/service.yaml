@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-dms-ui
-  name: csi-dms-ui
+    app: csi-dms-ui-service
+  name: csi-dms-ui-service
   namespace: csi-dev
 spec:
   ports:
