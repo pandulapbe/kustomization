@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-bm-invoice-ui
-  name: csi-bm-invoice-ui
+    app: csi-bm-invoice-ui-service
+  name: csi-bm-invoice-ui-service
   namespace: csi-dev
 spec:
   ports:
