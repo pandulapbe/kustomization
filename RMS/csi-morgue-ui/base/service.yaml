@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-morgue-ui
-  name: csi-morgue-ui
+    app: csi-morgue-ui-service
+  name: csi-morgue-ui-service
   namespace: csi-dev
 spec:
   ports:
