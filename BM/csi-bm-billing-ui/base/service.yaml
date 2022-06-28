@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-billing-ui
-  name: csi-billing-ui
+    app: csi-billing-ui-service
+  name: csi-billing-ui-service
   namespace: csi-dev
 spec:
   ports:
