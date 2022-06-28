@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-ehr-initialassessment
-  name: csi-ehr-initialassessment
+    app: csi-java-ehr-initialassessment
+  name: csi-java-ehr-initialassessment
   namespace: csi-dev
 spec:
   ports:
