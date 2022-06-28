@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-config-ui
-  name: csi-config-ui
+    app: csi-config-ui-service
+  name: csi-config-ui-service
   namespace: csi-dev
 spec:
   ports:
