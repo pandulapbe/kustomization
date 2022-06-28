@@ -1,0 +1,7 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-rms-resource-registry
+  namespace: csi-perf
+spec:
+  replicas: 2

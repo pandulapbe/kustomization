@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-ehr-specializedclinic
+  namespace: csi-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-ehr-specializedclinic
+      tier: backend
+      track: stable
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: csi-ehr-specializedclinic
+        module: ehr
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: active_profile
+              value: java-dev
+            - name: configserver
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+            - name: configserver
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: db-spe-url
+                  name: ehr-database-configs
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: db-spe-username
+                  name: ehr-database-secret
+            - name: SPRING_JPA_HIBERNATE_DIALECT
+              valueFrom:
+                configMapKeyRef:
+                  key: db-dialect
+                  name: service-configs
+            - name: SPRING_JPA_DATABASE-PLATFORM
+              valueFrom:
+                configMapKeyRef:
+                  key: db-dialect
+                  name: service-configs
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: db-spe-password
+                  name: ehr-database-secret
+            - name: hostname
+              value: csi-java-ehr-specializedclinic
+          envFrom:
+            - configMapRef:
+                name: service-configs
+          image: >-
+            harbor.cs.local/vidaplus/csi-ehr-specialized-clinic-java-sev:4.0.80.0
+          imagePullPolicy: IfNotPresent
+          name: csi-ehr-specializedclinic
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred

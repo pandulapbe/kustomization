@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-bloodbank-ui
+  namespace: csi-dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: csi-bloodbank-ui
+      tier: frontend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-bloodbank-ui
+        module: bloodbank
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+        - image: harbor.cs.local/vidaplus/bloodbank-ui:4.1.29.1 #4.1.16.1 #4.1.16.0 #4.1.14.0 #4.1.13.0
+          imagePullPolicy: IfNotPresent
+          name: csi-bloodbank-ui
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 500Mi
+            requests:
+              cpu: 25m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred

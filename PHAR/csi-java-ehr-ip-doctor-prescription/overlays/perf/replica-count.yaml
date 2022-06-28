@@ -1,0 +1,7 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-java-ehr-ip-doctor-prescription
+  namespace: csi-perf
+spec:
+  replicas: 2

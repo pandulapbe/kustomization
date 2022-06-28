@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-empi-ui
+  namespace: csi-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: csi-empi-ui
+      tier: frontend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-empi-ui
+        module: empi
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+        - image: 'harbor.cs.local/vidaplus/empi-ui:4.0.22.0'
+          imagePullPolicy: IfNotPresent
+          name: csi-empi-ui
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 100Mi
+            requests:
+              cpu: 2m
+              memory: 25Mi
+      imagePullSecrets:
+        - name: regcred
+

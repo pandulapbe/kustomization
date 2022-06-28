@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: csi-rms-ui
+  name: csi-rms-ui
+  namespace: csi-dev
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: csi-rms-ui
+  type: ClusterIP

@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-pms-rms-resource-registry
+  namespace: csi-dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: csi-pms-rms-resource-registry
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-pms-rms-resource-registry
+        module: rms
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: configserver
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+            - name: active_profile
+              valueFrom:
+                configMapKeyRef:
+                  key: activeProfile
+                  name: service-configs
+            - name: CACHE_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  key: cache_type
+                  name: service-configs
+            - name: hostname
+              value: csi-pms-rms-resource-registry
+            - name: FEIGN_HYSTRIX_ENABLED
+              value: 'false'
+            - name: SPRING_DATASOURCE_TOMCAT_MIN-EVICTABLE-IDLE-TIME-MILLIS
+              value: '60000'
+            - name: SPRING_DATASOURCE_TOMCAT_MAX-ACTIVE
+              value: '225'
+            - name: SPRING_DATASOURCE_TOMCAT_MAX-IDLE
+              value: '40'
+            - name: SPRING_DATASOURCE_TOMCAT_MIN-IDLE
+              value: '5'
+            - name: SPRING_JPA_PROPERTIES_HIBERNATE_TEMP_USE_JDBC_METADATA_DEFAULTS
+              value: 'true'
+          envFrom:
+            - configMapRef:
+                name: service-configs
+            - secretRef:
+                name: service-configs-secret
+            - configMapRef:
+                name: service-configs-adt
+            - secretRef:
+                name: service-adt-secret
+          image: >-
+            harbor.cs.local/vidaplus/csi-rms-resource-registry-java-sev:4.1.18.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 1200
+            periodSeconds: 40
+            timeoutSeconds: 30
+          name: csi-rms-resource-registry
+          ports:
+            - containerPort: 80
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 40
+            timeoutSeconds: 30
+          resources:
+            limits:
+              memory: 3Gi
+            requests:
+              cpu: 200m
+              memory: 1Gi
+      imagePullSecrets:
+        - name: regcred

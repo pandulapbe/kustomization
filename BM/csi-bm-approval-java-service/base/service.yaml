@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: csi-bm-approval-java-serviceg
+  name: csi-bm-approval-java-serviceg
+  namespace: csi-dev
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: csi-bm-approval-java-serviceg
+  type: ClusterIP

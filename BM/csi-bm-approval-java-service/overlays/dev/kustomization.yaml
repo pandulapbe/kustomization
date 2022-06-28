@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+bases:
+- ../../base
+images:
+- name: harbor.cs.local/vidaplus/csi-bm-approval-java-service
+  newTag: 4.3.124.2-b
+kind: Kustomization
+patchesStrategicMerge:
+- replica-count.yaml

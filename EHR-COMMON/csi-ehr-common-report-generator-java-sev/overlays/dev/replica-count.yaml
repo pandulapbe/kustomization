@@ -1,0 +1,7 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-ehr-common-report-generator-java-sev
+  namespace: csi-dev
+spec:
+  replicas: 2

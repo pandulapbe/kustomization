@@ -1,0 +1,7 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-dms-ui
+  namespace: csi-dev
+spec:
+  replicas: 1

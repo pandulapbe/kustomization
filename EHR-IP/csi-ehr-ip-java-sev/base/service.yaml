@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: csi-ehr-ip
+  name: csi-ehr-ip
+  namespace: csi-dev
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: csi-ehr-ip
+  type: ClusterIP

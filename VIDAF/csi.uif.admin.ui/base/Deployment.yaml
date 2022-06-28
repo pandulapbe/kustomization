@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-form-builder-ui
+  namespace: csi-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: csi-form-builder-ui
+      tier: frontend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-form-builder-ui
+        module: base
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+        - image: 'harbor.cs.local/vidaplus/form-builder-ui:4.0.185.0'
+          imagePullPolicy: IfNotPresent
+          name: csi-form-builder-ui
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 100Mi
+            requests:
+              cpu: 2m
+              memory: 25Mi
+      imagePullSecrets:
+        - name: regcred
+

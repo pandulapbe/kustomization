@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: csi-phr-base
+  name: csi-phr-base
+  namespace: csi-dev
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: csi-phr-base
+  type: ClusterIP

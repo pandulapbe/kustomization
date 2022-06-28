@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-net-bloodbnk
+  namespace: csi-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: csi-net-bloodbnk
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-net-bloodbnk
+        module: bloodbank
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  key: net_environment
+                  name: service-configs
+            - name: config_server
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+          image: harbor.cs.local/vidaplus/bb-donation-srv:4.1.10.0-a1
+          imagePullPolicy: IfNotPresent
+          name: csi-net-bloodbnk
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 512Mi
+      imagePullSecrets:
+        - name: regcred

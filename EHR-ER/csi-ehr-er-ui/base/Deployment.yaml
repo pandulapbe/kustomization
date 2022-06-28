@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-ehr-er-ui
+  namespace: csi-dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: csi-ehr-er-ui
+      tier: frontend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-ehr-er-ui
+        module: er
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+        - image: 'harbor.cs.local/vidaplus/ehr-er-ui:4.1.13.0-b39'
+          imagePullPolicy: IfNotPresent
+          name: csi-ehr-er-ui
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 100Mi
+            requests:
+              cpu: 2m
+              memory: 25Mi
+      imagePullSecrets:
+        - name: regcred
+

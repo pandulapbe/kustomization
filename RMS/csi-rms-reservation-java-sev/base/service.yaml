@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: csi-pms-rms-reservation
+  name: csi-pms-rms-reservation
+  namespace: csi-dev
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: csi-pms-rms-reservation
+  type: ClusterIP

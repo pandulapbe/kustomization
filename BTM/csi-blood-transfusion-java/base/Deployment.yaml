@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-java-blood-transfusion
+  namespace: csi-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: csi-java-blood-transfusion
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-java-blood-transfusion
+        module: bloodbank
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: configserver
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+            - name: active_profile
+              valueFrom:
+                configMapKeyRef:
+                  key: active_profile
+                  name: service-configs-adt
+            - name: hostname
+              value: csi-java-blood-transfusion
+            - name: FEIGN_HYSTRIX_ENABLED
+              value: 'false'
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: bloodTransfusion-db-url
+                  name: service-config-bloodbank
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: bloodTransfusion-db-username
+                  name: service-bloodbank-secret
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: bloodTransfusion-db-password
+                  name: service-bloodbank-secret
+            - name: SPRING_DATASOURCE_JPA_DATABASE_PLATFORM
+              valueFrom:
+                configMapKeyRef:
+                  key: bloodTransfusion-db-platform
+                  name: service-config-bloodbank
+          envFrom:
+            - configMapRef:
+                name: service-configs
+            - configMapRef:
+                name: service-configs-adt
+            - secretRef:
+                name: service-configs-secret
+            - secretRef:
+                name: service-adt-secret
+          image: >-
+            harbor.cs.local/vidaplus/csi-blood-transfusion-java:4.0.5.1
+          imagePullPolicy: IfNotPresent
+          name: csi-java-blood-transfusion
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred

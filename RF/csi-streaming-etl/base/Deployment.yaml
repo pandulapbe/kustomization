@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-streaming-etl
+  namespace: csi-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: csi-streaming-etl
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-streaming-etl
+        module: etl
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: kafka_bootstrap_servers
+              valueFrom:
+                configMapKeyRef:
+                  key: CSI_LOGS_KAFKA_BOOTSTRAPADDRESS
+                  name: service-configs
+            - name: elk_log_topic
+              valueFrom:
+                configMapKeyRef:
+                  key: CSI_LOGS_KAFKA_TOPIC
+                  name: service-configs
+          envFrom:
+            - configMapRef:
+                name: service-configs-stream-etl
+            - secretRef:
+                name: service-stream-etl-secret
+          image: 'harbor.cs.local/vidaplus/csi-streaming-etl:4.1.1.7'
+          imagePullPolicy: IfNotPresent
+          name: csi-streaming-etl
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 4Gi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred

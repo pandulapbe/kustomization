@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-billing-ui
+  namespace: csi-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: csi-billing-ui
+      tier: frontend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-billing-ui
+        module: billing
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+        - image: 'harbor.cs.local/vidaplus/billing-ui:4.5.56.0'
+          imagePullPolicy: IfNotPresent
+          name: csi-billing-ui
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 500Mi
+            requests:
+              cpu: 25m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred
+

@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+- ../../base
+
+patchesStrategicMerge:
+- replica-count.yaml
+
+images:
+- name: harbor.cs.local/vidaplus/csi-rms-morgue-java-service
+  newTag: 4.1.36.0

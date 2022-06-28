@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: csi-java-ehr-ip-doctor-prescription
+  name: csi-java-ehr-ip-doctor-prescription
+  namespace: csi-dev
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: csi-java-ehr-ip-doctor-prescription
+  type: ClusterIP

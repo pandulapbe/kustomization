@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-ehr-ldr
+  namespace: csi-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-ehr-ldr
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-ehr-ldr
+        module: ehr
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: active_profile
+              valueFrom:
+                configMapKeyRef:
+                  key: activeProfile
+                  name: service-configs
+            - name: configserver
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: db-ldr-url
+                  name: ehr-database-configs
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: db-ldr-username
+                  name: ehr-database-secret
+            - name: SPRING_JPA_HIBERNATE_DIALECT
+              valueFrom:
+                configMapKeyRef:
+                  key: db-dialect
+                  name: service-configs
+            - name: SPRING_JPA_DATABASE-PLATFORM
+              valueFrom:
+                configMapKeyRef:
+                  key: db-dialect
+                  name: service-configs
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: db-ldr-password
+                  name: ehr-database-secret
+            - name: hostname
+              value: csi-java-ehr-ldr
+          envFrom:
+            - configMapRef:
+                name: service-configs
+            - secretRef:
+                name: service-configs-secret
+          image: 'harbor.cs.local/vidaplus/csi-ehr-ldr-java-sev:4.0.73.0'
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 1200
+            timeoutSeconds: 10
+          name: csi-ehr-ldr
+          ports:
+            - containerPort: 80
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 20
+            timeoutSeconds: 10
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred

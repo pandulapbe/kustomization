@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-net-erfuncti
+  namespace: csi-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-net-erfuncti
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-net-erfuncti
+        module: er
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  key: net_environment
+                  name: service-configs
+            - name: config_server
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+          image: harbor.cs.local/vidaplus/csi-ehr-er-functions-dotnet-sev:4.1.9.0-b13
+          name: csi-ehr-er-functions-dotnet-sev
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 5Gi
+            requests:
+              cpu: 50m
+              memory: 1Gi
+      imagePullSecrets:
+        - name: regcred

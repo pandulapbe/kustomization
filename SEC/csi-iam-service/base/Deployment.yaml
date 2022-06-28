@@ -1,0 +1,157 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-iam
+  namespace: csi-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-iam
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-iam
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: PROXY_ADDRESS_FORWARDING
+              value: 'true'
+            - name: BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: domain_name
+                  name: security-service-configs
+            - name: KEYCLOAK_HOSTNAME
+              value: csi.dev.cloudsol.lk
+            - name: KEYCLOAK_LOGLEVEL
+              value: WARN
+            - name: JGROUPS_DISCOVERY_PROTOCOL
+              value: kubernetes.KUBE_PING
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KUBERNETES_LABELS
+              value: app=csi-iam
+            - name: JGROUPS_DISCOVERY_PROPERTIES
+              value: 'port_range=0,dump_requests=true'
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  key: KAFKA_BOOTSTRAP_SERVERS
+                  name: service-configs
+            - name: apm_server
+              valueFrom:
+                configMapKeyRef:
+                  key: apm_server
+                  name: service-configs
+            - name: GROUP_ID_CONFIG
+              value: register-1
+            - name: JAVA_OPTS
+              value: >-
+                -Xms64m -Xmx3g -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m
+                -XX:+UseG1GC -XX:+UseStringDeduplication
+                -XX:+HeapDumpOnOutOfMemoryError
+                -XX:HeapDumpPath=/opt/jboss/memdump  -XX:+PrintGCDetails
+                -XX:+PrintGCApplicationStoppedTime
+                -XX:+PrintGCApplicationConcurrentTime  -XX:+PrintGCDateStamps
+                -Xloggc:gclog.log  -XX:+UseGCLogFileRotation
+                -XX:NumberOfGCLogFiles=5  -XX:GCLogFileSize=2000k
+                -Djava.net.preferIPv4Stack=true
+                -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS
+                -Djava.awt.headless=true
+                -Djavax.net.ssl.trustStore=/etc/pki/ca-trust/extracted/java/cacerts
+                -Djavax.net.ssl.trustStorePassword=changeit
+                -Delastic.apm.server_urls=$(apm_server)
+                -Delastic.apm.service_name="csi-iam"
+                -Delastic.apm.disable_instrumentations=""
+                -Delastic.apm.application_packages=com.afrunt
+                -Delastic.apm.environment=$(KUBERNETES_NAMESPACE) 
+                -javaagent:/opt/jboss/elastic-apm-agent-1.17.0.jar
+            - name: REPORTING_ROUTING_KEY
+              value: ''
+            - name: KEYCLOAK_USER
+              value: tishan
+          envFrom:
+            - configMapRef:
+                name: iam-service-configs
+            - secretRef:
+                name: iam-service-secret
+          image: 'harbor.cs.local/vidaplus/csi-iam:4.2.93.0'
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /auth/
+              port: http
+            initialDelaySeconds: 1200
+            timeoutSeconds: 10
+          name: csi-iam-app
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 8443
+              name: https
+          readinessProbe:
+            httpGet:
+              path: auth/realms/master
+              port: http
+            initialDelaySeconds: 20
+            timeoutSeconds: 10
+          resources:
+            limits:
+              cpu: 3000m
+              memory: 3Gi
+            requests:
+              cpu: 1500m
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: /opt/key_files
+              name: cacerts
+      imagePullSecrets:
+        - name: regcred
+      serviceAccountName: jgroups-kubeping-service-account
+      volumes:
+        - name: cacerts
+          projected:
+            sources:
+              - secret:
+                  name: iam-cacerts-secret
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jgroups-kubeping-service-account
+  namespace: csi-dev
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: jgroups-kubeping-pod-reader
+  namespace: csi-dev
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: jgroups-kubeping-api-access
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: jgroups-kubeping-pod-reader
+subjects:
+  - kind: ServiceAccount
+    name: jgroups-kubeping-service-account
+    namespace: csi-dev
+

@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-pms-adt-request
+  namespace: csi-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: csi-pms-adt-request
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-pms-adt-request
+        module: adt
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: namespace
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: configserver
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+            - name: active_profile
+              valueFrom:
+                configMapKeyRef:
+                  key: active_profile
+                  name: service-configs-adt
+            - name: hostname
+              value: csi-pms-adt-request
+            - name: FEIGN_HYSTRIX_ENABLED
+              value: 'false'
+            - name: SPRING_JPA_PROPERTIES_HIBERNATE_TEMP_USE_JDBC_METADATA_DEFAULTS
+              value: 'true'
+          envFrom:
+            - configMapRef:
+                name: service-configs
+            - secretRef:
+                name: service-configs-secret
+            - configMapRef:
+                name: service-configs-adt
+            - secretRef:
+                name: service-adt-secret
+          image: >-
+            harbor.cs.local/vidaplus/csi-pms-adt-request-java-sev:4.1.10.0
+
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 1200
+            periodSeconds: 40
+            timeoutSeconds: 30
+          name: csi-pms-adt-request
+          ports:
+            - containerPort: 80
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 40
+            timeoutSeconds: 30
+          resources:
+            limits:
+              memory: 2Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred

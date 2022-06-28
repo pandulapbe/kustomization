@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cs-net-econsentui
+  namespace: csi-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cs-net-econsentui
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: cs-net-econsentui
+        module: econsent
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: VERSION
+              value: '${parameters.Tag}'
+          envFrom:
+            - configMapRef:
+                name: econsent-service-configs
+          image: 'harbor.cs.local/vidaplus/e-consent-ui:4.1.1.9'
+          imagePullPolicy: IfNotPresent
+          name: cs-net-econsentui
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 25m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred

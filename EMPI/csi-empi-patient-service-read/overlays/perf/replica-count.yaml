@@ -1,0 +1,7 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-empi-patient-service-read
+  namespace: csi-perf
+spec:
+  replicas: 2

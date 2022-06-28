@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-workflow-automation
+  namespace: csi-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-workflow-automation
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-workflow-automation
+        module: base
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: SPRING_DATA_MONGODB_HOST
+              value: mongo
+            - name: SPRING_DATA_MONGODB_PORT
+              value: '27017'
+            - name: SPRING_DATA_MONGODB_DATABASE
+              value: task_list
+            - name: active_profile
+              valueFrom:
+                configMapKeyRef:
+                  key: activeProfile
+                  name: service-configs
+            - name: configserver
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              valueFrom:
+                configMapKeyRef:
+                  key: db-driver
+                  name: service-configs
+            - name: HIBERNATE_DIALECT
+              valueFrom:
+                configMapKeyRef:
+                  key: db-dialect
+                  name: service-configs
+            - name: SPRING_JPA_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: db-database
+                  name: ehr-database-secret
+            - name: hostname
+              value: csi-java-workflow-automation
+          envFrom:
+            - configMapRef:
+                name: service-configs
+          image: >-
+            harbor.cs.local/vidaplus/csi-workflow-automation-service-java-sev:4.0.32.0
+          imagePullPolicy: IfNotPresent
+          name: csi-ehr-common
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred

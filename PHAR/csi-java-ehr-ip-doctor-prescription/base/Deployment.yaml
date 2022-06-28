@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-java-ehr-ip-doctor-prescription
+  namespace: csi-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-java-ehr-ip-doctor-prescription
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-java-ehr-ip-doctor-prescription
+        module: pharmacy
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: configserver
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+            - name: active_profile
+              valueFrom:
+                configMapKeyRef:
+                  key: active_profile
+                  name: service-config-pharmacy
+            - name: apm_server
+              valueFrom:
+                configMapKeyRef:
+                  key: apm_server
+                  name: service-configs
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: prescription-db-url
+                  name: service-config-pharmacy
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: prescription-db-username
+                  name: service-pharmacy-secret
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: prescription-db-password
+                  name: service-pharmacy-secret
+            - name: SPRING_DATASOURCE_JPA_DATABASE_PLATFORM
+              valueFrom:
+                configMapKeyRef:
+                  key: prescription-db-platform
+                  name: service-config-pharmacy
+            - name: KAFKA_BOOTSTRAP-SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  key: bootstrap-servers
+                  name: service-config-pharmacy
+            - name: ADT-DISCHARGE-START-NOTIFICATION_T
+              valueFrom:
+                configMapKeyRef:
+                  key: discharge-start-notification
+                  name: service-config-pharmacy
+            - name: KAFKA_TOPIC_DISCHARGE-CLEAR-NOTIFICATION
+              valueFrom:
+                configMapKeyRef:
+                  key: discharge-clear-notification
+                  name: service-config-pharmacy
+            - name: KAFKA_TOPIC_DISCHARGE-SUMMARY-CLEAR-NOTIFICATION
+              valueFrom:
+                configMapKeyRef:
+                  key: discharge-summary-clear-notification
+                  name: service-config-pharmacy
+            - name: hostname
+              value: csi-java-ehr-ip-doctor-prescription
+          envFrom:
+            - configMapRef:
+                name: service-configs
+            - secretRef:
+                name: service-configs-secret
+          image: >-
+            harbor.cs.local/vidaplus/csi-java-ehr-ip-doctor-prescription:4.0.20.31
+          livenessProbe:
+            httpGet:
+              path: /api/health/liveness
+              port: http
+            initialDelaySeconds: 1200
+            timeoutSeconds: 10
+          name: csi-java-ehr-ip-doctor-prescription
+          ports:
+            - containerPort: 80
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /api/health/readiness
+              port: http
+            initialDelaySeconds: 20
+            timeoutSeconds: 10
+          resources:
+            limits:
+              memory: 3Gi
+            requests:
+              cpu: 50m
+              memory: 2Gi
+      imagePullSecrets:
+        - name: regcred

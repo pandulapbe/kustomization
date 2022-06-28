@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-net-empi-crs-inte
+  namespace: csi-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-net-empi-crs-inte
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-net-empi-crs-inte
+        module: empi
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  key: net_environment
+                  name: service-configs
+            - name: config_server
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+          image: >-
+            harbor.cs.local/vidaplus/csi-empi-crs-integration:4.2.1.0
+          imagePullPolicy: IfNotPresent
+          name: csi-net-empi-crs-inte
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 750Mi
+      imagePullSecrets:
+        - name: regcred
+

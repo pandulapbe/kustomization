@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-report-studio-ui
+  namespace: csi-dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: csi-report-studio-ui
+      tier: frontend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-report-studio-ui
+        module: reporting
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+        - image: 'harbor.cs.local/vidaplus/report-studio-ui:4.1.17.3'
+          imagePullPolicy: IfNotPresent
+          name: csi-report-studio-ui
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred

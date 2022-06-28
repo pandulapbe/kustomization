@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-net-ehr-dboardpc
+  namespace: csi-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: csi-net-ehr-dboardpc
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-net-ehr-dboardpc
+        module: ehr
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  key: net_environment
+                  name: service-configs
+            - name: config_server
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+          image: >-
+            harbor.cs.local/vidaplus/csi-ehr-com-ip-dashboardwidget-dotnet-sev:4.0.2.0
+          imagePullPolicy: IfNotPresent
+          name: csi-net-ehr-dboardpc
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 3Gi
+            requests:
+              cpu: 50m
+              memory: 750Mi
+      imagePullSecrets:
+        - name: regcred

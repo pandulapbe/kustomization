@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: csi-net-base-sms
+  name: csi-net-base-sms
+  namespace: csi-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-net-base-sms
+  template:
+    metadata:
+      labels:
+        app: csi-net-base-sms
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  key: net_environment
+                  name: service-configs
+            - name: config_server
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+          image: 'harbor.cs.local/vidaplus/csi-net-base-sms:4.0.26.0'
+          name: csi-net-base-sms
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred
+

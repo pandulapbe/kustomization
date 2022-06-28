@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-net-himservi
+  namespace: csi-dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: csi-net-himservi
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-net-himservi
+        module: him
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  key: net_environment
+                  name: service-configs
+            - name: config_server
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+          image: >-
+            harbor.cs.local/vidaplus/csi-health-information-srv:4.1.178.0-b8
+          name: csi-net-himservi
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              memory: 2Gi
+            requests:
+              cpu: 50m
+              memory: 750Mi
+      imagePullSecrets:
+        - name: regcred

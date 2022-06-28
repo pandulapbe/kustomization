@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-management-middleware
+  namespace: csi-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: document-management-middleware
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: document-management-middleware
+        module: dms
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: PROFILE
+              value: prod
+            - name: db_user
+              valueFrom:
+                secretKeyRef:
+                  key: db_user
+                  name: service-secret-dms
+            - name: db_password
+              valueFrom:
+                secretKeyRef:
+                  key: db_password
+                  name: service-secret-dms
+            - name: mongo_connection_string
+              valueFrom:
+                configMapKeyRef:
+                  key: mongo_connection_string
+                  name: service-configs-dms
+            - name: kafka_bootstrap_servers
+              valueFrom:
+                configMapKeyRef:
+                  key: CSI_LOGS_KAFKA_BOOTSTRAPADDRESS
+                  name: service-configs
+            - name: elk_log_topic
+              valueFrom:
+                configMapKeyRef:
+                  key: CSI_LOGS_KAFKA_TOPIC
+                  name: service-configs
+            - name: CSI_ENV_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  key: CSI_ENV_PREFIX
+                  name: service-configs
+            - name: hostname
+              value: dms-service
+          envFrom:
+            - configMapRef:
+                name: service-configs-dms
+            - secretRef:
+                name: service-secret-dms
+            - configMapRef:
+                name: service-configs
+            - secretRef:
+                name: service-configs-secret
+          image: >-
+            harbor.cs.local/vidaplus/document-management-middleware:4.1.1.9
+          imagePullPolicy: Always
+          name: document-management-middleware
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            limits:
+              memory: 4Gi
+            requests:
+              cpu: 50m
+              memory: 2Gi
+      imagePullSecrets:
+        - name: regcred

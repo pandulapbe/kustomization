@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-ehr-common-scheduler
+  namespace: csi-dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: csi-ehr-common-scheduler
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-ehr-common-scheduler
+        module: ehr
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: active_profile
+              valueFrom:
+                configMapKeyRef:
+                  key: activeProfile
+                  name: service-configs
+            - name: configserver
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  key: KAFKA_BOOTSTRAP_SERVERS
+                  name: service-configs
+            - name: CSI_LOGS_KAFKA_TOPIC
+              valueFrom:
+                configMapKeyRef:
+                  key: CSI_LOGS_KAFKA_TOPIC
+                  name: service-configs
+            - name: hostname
+              value: csi-java-ehr-common-scheduler
+          image: >-
+            harbor.cs.local/vidaplus/csi-ehr-common-scheduler-java-sev:4.1.2.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 1200
+            timeoutSeconds: 10
+          name: csi-ehr-common-scheduler
+          ports:
+            - containerPort: 80
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 20
+            timeoutSeconds: 10
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+      imagePullSecrets:
+        - name: regcred

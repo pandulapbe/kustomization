@@ -1,0 +1,7 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-ehr-ic-dashboard
+  namespace: vidacom
+spec:
+  replicas: 3

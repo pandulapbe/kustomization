@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csi-opd-patient-pomr
+  namespace: csi-dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: csi-opd-patient-pomr
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: csi-opd-patient-pomr
+        module: ehr
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - env:
+            - name: active_profile
+              valueFrom:
+                configMapKeyRef:
+                  key: activeProfile
+                  name: service-configs
+            - name: configserver
+              valueFrom:
+                configMapKeyRef:
+                  key: config_server
+                  name: service-configs
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: db-pom-url
+                  name: ehr-database-configs
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: db-pom-username
+                  name: ehr-database-secret
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: db-pom-password
+                  name: ehr-database-secret
+            - name: SPRING_JPA_DATABASE-PLATFORM
+              valueFrom:
+                configMapKeyRef:
+                  key: SPRING_JPA_HIBERNATE_DIALECT
+                  name: service-configs
+            - name: SPRING_JPA_HIBERNATE_DIALECT
+              valueFrom:
+                configMapKeyRef:
+                  key: db-dialect
+                  name: service-configs
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              valueFrom:
+                configMapKeyRef:
+                  key: db-driver
+                  name: service-configs
+            - name: HIBERNATE_DIALECT
+              valueFrom:
+                configMapKeyRef:
+                  key: db-dialect
+                  name: service-configs
+            - name: hostname
+              value: csi-java-ehr-patient-pomr
+          envFrom:
+            - configMapRef:
+                name: service-configs
+          image: >-
+            harbor.cs.local/vidaplus/csi-ehr-opd-patient-pomr-java-sev:4.1.8.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 1200
+            timeoutSeconds: 10
+          name: csi-opd-patient-pomr
+          ports:
+            - containerPort: 80
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 20
+            timeoutSeconds: 10
+          resources:
+            limits:
+              memory: 2Gi
+            requests:
+              cpu: 50m
+              memory: 512Mi
+      imagePullSecrets:
+        - name: regcred
