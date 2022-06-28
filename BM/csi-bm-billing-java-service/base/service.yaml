@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-bm-billing-java-service
-  name: csi-bm-billing-java-service
+    app: csi-bm-billing
+  name: csi-bm-billing
   namespace: csi-dev
 spec:
   ports:
