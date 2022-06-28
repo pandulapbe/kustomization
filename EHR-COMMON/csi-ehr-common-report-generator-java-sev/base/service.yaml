@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-ehr-common-report-generator-java-sev
-  name: csi-ehr-common-report-generator-java-sev
+    app: csi-java-ehr-common-report-generator
+  name: csi-java-ehr-common-report-generator
   namespace: csi-dev
 spec:
   ports:
