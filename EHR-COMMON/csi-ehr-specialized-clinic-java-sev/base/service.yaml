@@ -3,8 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: csi-ehr-specializedclinic
-  name: csi-ehr-specializedclinic
+    app: csi-java-ehr-specializedclinic
+  name: csi-java-ehr-specializedclinic
   namespace: csi-dev
 spec:
   ports:
